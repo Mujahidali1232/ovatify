@@ -1,0 +1,1912 @@
+{
+	"info": {
+		"_postman_id": "8b5d3a2e-1c7b-4d4e-9f8a-2c3b4d5e6f7a",
+		"name": "Ovatify API",
+		"description": "Comprehensive Postman collection for the Ovatify application API.\n\nAuth flow is fully scripted: hit each Auth request in order, OR use \"Run Collection\" on the Auth folder. The test scripts auto-capture OTPs, user_id, and tokens into collection variables, so you don't have to copy/paste anything between requests.\n\nWhen APP_DEBUG=true on the backend, OTPs are returned in the response body (verification_code field). On prod with APP_DEBUG=false, OTPs only arrive via email.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "1. Signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Generate a fresh user per run so signup doesn't collide with previous runs.",
+									"const ts = Date.now();",
+									"pm.collectionVariables.set('email', 'tester_' + ts + '@example.com');",
+									"pm.collectionVariables.set('phone', '+1' + ts.toString().slice(-9));",
+									"pm.collectionVariables.set('username', 'tester_' + ts);",
+									"pm.collectionVariables.set('password', 'secret123');"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('signup returns 201', () => pm.response.to.have.status(201));",
+									"const body = pm.response.json();",
+									"pm.test('requires_verification is true', () => pm.expect(body.requires_verification).to.eql(true));",
+									"pm.test('is_verified is false', () => pm.expect(body.data[0].is_verified).to.eql(false));",
+									"if (body.verification_code) pm.collectionVariables.set('otp', body.verification_code);",
+									"if (body.user_id) pm.collectionVariables.set('user_id', body.user_id);",
+									"console.log('Signup OK. user_id=' + body.user_id + ' otp=' + body.verification_code);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{username}}\",\n    \"email\": \"{{email}}\",\n    \"phone\": \"{{phone}}\",\n    \"password\": \"{{password}}\",\n    \"role\": \"consumer\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "signup" ]
+						}
+					}
+				},
+				{
+					"name": "2. Login (unverified user) — expect 403 + fresh OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('login returns 403 with requires_verification', () => {",
+									"    pm.response.to.have.status(403);",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.requires_verification).to.eql(true);",
+									"});",
+									"const body = pm.response.json();",
+									"if (body.verification_code) pm.collectionVariables.set('otp', body.verification_code);",
+									"console.log('Fresh OTP from login re-issue: ' + body.verification_code);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "login" ]
+						}
+					}
+				},
+				{
+					"name": "3. Verify Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('verify returns 200 + token', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"pm.test('is_verified is now true', () => pm.expect(body.user.is_verified).to.eql(true));",
+									"if (body.token) pm.collectionVariables.set('token', body.token);",
+									"console.log('Verified. token=' + body.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"code\": \"{{otp}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-code",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "verify-code" ]
+						}
+					}
+				},
+				{
+					"name": "4. Login (verified user) — expect 200 + token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('login returns 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"pm.test('token is returned', () => pm.expect(body.token).to.be.a('string'));",
+									"if (body.token) pm.collectionVariables.set('token', body.token);",
+									"console.log('Login OK. token=' + body.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "login" ]
+						}
+					}
+				},
+				{
+					"name": "5. Send Verification Code (resend)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('send returns 200', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"type\": \"email\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/send-verification-code",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "send-verification-code" ]
+						}
+					}
+				},
+				{
+					"name": "6. Forgot Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('forgot returns 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"if (body.verification_code) pm.collectionVariables.set('otp', body.verification_code);",
+									"console.log('Reset OTP: ' + body.verification_code);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "forgot-password" ]
+						}
+					}
+				},
+				{
+					"name": "7. Verify Reset Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('verify-reset returns 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"if (body.token) pm.collectionVariables.set('token', body.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"code\": \"{{otp}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-reset-code",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "verify-reset-code" ]
+						}
+					}
+				},
+				{
+					"name": "8. Create Password (set new password)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set('password', 'newpass456');"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('create-password returns 200', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/create-password",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "create-password" ]
+						}
+					}
+				},
+				{
+					"name": "9. Login (with new password)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('login w/ new pwd returns 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"if (body.token) pm.collectionVariables.set('token', body.token);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "login" ]
+						}
+					}
+				},
+				{
+					"name": "10. Social Login (Firebase / Google / Facebook token)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"google\",\n    \"token\": \"YOUR_SOCIAL_TOKEN_HERE\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/social-login",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "social-login" ]
+						}
+					}
+				},
+				{
+					"name": "11. Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "auth", "logout" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Lookups",
+			"description": "Reference data used by Flutter to populate filter chips, license picker, agreement template picker, and DSP platform picker.",
+			"item": [
+				{
+					"name": "Genres",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/genres",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "genres" ]
+						}
+					}
+				},
+				{
+					"name": "License Tiers (Personal / Commercial / YouTube / Sync)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/license-tiers",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "license-tiers" ]
+						}
+					}
+				},
+				{
+					"name": "Agreement Templates (list)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agreement-templates",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "agreement-templates" ]
+						}
+					}
+				},
+				{
+					"name": "Agreement Template (single)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agreement-templates/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "agreement-templates", "1" ]
+						}
+					}
+				},
+				{
+					"name": "DSP Platforms (Spotify / YT / Tidal / ...)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/dsp-platforms",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "dsp-platforms" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Distribution",
+			"description": "Track Distribution to DSPs (Spotify / YT Music / Tidal etc.). Submit a track for delivery, then poll status. Available to creators (own tracks) and consumers (tracks they've invested in).",
+			"item": [
+				{
+					"name": "Submit Distribution",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"song_generation_id\": 1,\n    \"release_title\": \"Family Memories - Single\",\n    \"artist_name\": \"Luna Beats\",\n    \"release_date\": \"2026-06-01\",\n    \"isrc_code\": \"USRC17607839\",\n    \"platforms\": [\"spotify\", \"yt-music\", \"tidal\"]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/distribute",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "distribute" ]
+						}
+					}
+				},
+				{
+					"name": "Submit Distribution (with cover_art file)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "song_generation_id", "value": "1", "type": "text" },
+								{ "key": "release_title", "value": "Family Memories - Single", "type": "text" },
+								{ "key": "artist_name", "value": "Luna Beats", "type": "text" },
+								{ "key": "release_date", "value": "2026-06-01", "type": "text" },
+								{ "key": "isrc_code", "value": "USRC17607839", "type": "text" },
+								{ "key": "platforms[]", "value": "spotify", "type": "text" },
+								{ "key": "platforms[]", "value": "yt-music", "type": "text" },
+								{ "key": "cover_art", "type": "file", "src": [] }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/distribute",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "distribute" ]
+						}
+					}
+				},
+				{
+					"name": "My Distributions (list)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/distribute?per_page=20&page=1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "distribute" ],
+							"query": [
+								{ "key": "per_page", "value": "20" },
+								{ "key": "page", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Distribution Status (single)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/distribute/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "distribute", "1" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Wallet",
+			"description": "Lightweight wallet binding for crypto investments (MetaMask / WalletConnect). Stores the wallet address client-side SDK reports.",
+			"item": [
+				{
+					"name": "My Wallet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wallet",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "wallet" ]
+						}
+					}
+				},
+				{
+					"name": "Connect Wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"wallet_address\": \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\",\n    \"wallet_provider\": \"metamask\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/wallet/connect",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "wallet", "connect" ]
+						}
+					}
+				},
+				{
+					"name": "Disconnect Wallet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wallet/disconnect",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "wallet", "disconnect" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/profile",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "user", "profile" ]
+						}
+					}
+				},
+				{
+					"name": "Get User (auth check)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "user" ]
+						}
+					}
+				},
+				{
+					"name": "Upload Profile Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "profile_image", "type": "file", "src": [] }
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/user/profile-image",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "user", "profile-image" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Creator Sessions (Upload / Create flow)",
+			"description": "Drafts → ideas → customize → mix → arrange → finalize → publish. Backs the Figma 'Upload your own content' + 'Create a Session' pipeline.",
+			"item": [
+				{
+					"name": "Create Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Reflection\",\n    \"overview\": \"A chill lo-fi track for late-night drives\",\n    \"file_type\": \"audio\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions" ] }
+					}
+				},
+				{
+					"name": "Create Session (with cover_image upload)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "title", "value": "Reflection", "type": "text" },
+								{ "key": "overview", "value": "Track summary...", "type": "text" },
+								{ "key": "file_type", "value": "audio", "type": "text" },
+								{ "key": "cover_image", "type": "file", "src": [] }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions" ] }
+					}
+				},
+				{
+					"name": "List Sessions (default: drafts)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/sessions?status=&per_page=20&page=1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "sessions" ],
+							"query": [
+								{ "key": "status", "value": "", "description": "draft|ideas|customizing|mixing|arranging|completed|published — omit for all non-published" },
+								{ "key": "per_page", "value": "20" },
+								{ "key": "page", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Session",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1" ] }
+					}
+				},
+				{
+					"name": "Delete Session",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1" ] }
+					}
+				},
+				{
+					"name": "Add Idea (text)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"text\",\n    \"content\": \"Verse 1: walking through the rain...\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/ideas", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "ideas" ] }
+					}
+				},
+				{
+					"name": "Add Idea (audio / document file)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "type", "value": "audio", "type": "text", "description": "audio | document" },
+								{ "key": "file", "type": "file", "src": [] }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/ideas", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "ideas" ] }
+					}
+				},
+				{
+					"name": "List Ideas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/ideas", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "ideas" ] }
+					}
+				},
+				{
+					"name": "Remove Idea",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/ideas/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "ideas", "1" ] }
+					}
+				},
+				{
+					"name": "Customize (Customize Your Track screen)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"instrumental_type\": \"Solo singer\",\n    \"genre\": \"Lo-fi\",\n    \"tempo\": 75\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/customize", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "customize" ] }
+					}
+				},
+				{
+					"name": "Mix (Track Mixing screen)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tempo\": 50,\n    \"equalizer\": {\n        \"64Hz\": 0.3,\n        \"800Hz\": 0.5,\n        \"4KHz\": 0.7,\n        \"14KHz\": 0.4\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/mix", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "mix" ] }
+					}
+				},
+				{
+					"name": "Arrange (Track Arrangement screen)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tempo\": [],\n    \"beat\": [],\n    \"vocals\": [],\n    \"bass\": []\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/arrange", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "arrange" ] }
+					}
+				},
+				{
+					"name": "Finalize (Completed Mixed Summary screen)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "final_audio", "type": "file", "src": [], "description": "optional rendered output" },
+								{ "key": "metadata_review[genre]", "value": "R&B", "type": "text" },
+								{ "key": "metadata_review[bpm]", "value": "90", "type": "text" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/finalize", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "finalize" ] }
+					}
+				},
+				{
+					"name": "Publish — sale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sale_type\": \"sale\",\n    \"price\": 19,\n    \"preview_duration\": 30,\n    \"agreement\": \"Standard Artist Agreement body...\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/publish", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "publish" ] }
+					}
+				},
+				{
+					"name": "Publish — investment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sale_type\": \"investment\",\n    \"total_valuation\": 5000,\n    \"price_per_block\": 50,\n    \"max_available_blocks\": 100,\n    \"agreement\": \"Investment agreement body...\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/publish", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "publish" ] }
+					}
+				},
+				{
+					"name": "Publish — license",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sale_type\": \"license\",\n    \"license_type\": \"personal\",\n    \"price_per_license\": 99,\n    \"license_duration\": 12,\n    \"agreement\": \"Usage rights description...\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/sessions/1/publish", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "sessions", "1", "publish" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "AI Tools (Creative Workspace)",
+			"description": "All 8 tools from the Figma Creative Workspace. Each POST returns an AiTask row with status (placeholder result for now — real provider integration is a TODO). Use GET tasks/{id} to poll.",
+			"item": [
+				{
+					"name": "Vocal Enhancer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [], "description": "optional source audio" },
+								{ "key": "mode", "value": "enhance_existing", "type": "text", "description": "generate_new | enhance_existing" },
+								{ "key": "vocal_style", "value": "soulful, robotic, airy", "type": "text" },
+								{ "key": "vocal_type", "value": "female", "type": "text", "description": "male | female | duet" },
+								{ "key": "genre_style", "value": "R&B", "type": "text" },
+								{ "key": "vocal_mood", "value": "Energetic", "type": "text" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/vocal-enhancer", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "vocal-enhancer" ] }
+					}
+				},
+				{
+					"name": "Melody Generator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [] },
+								{ "key": "genre", "value": "POP", "type": "text" },
+								{ "key": "melody_style", "value": "Chill & Smooth", "type": "text" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/melody-generator", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "melody-generator" ] }
+					}
+				},
+				{
+					"name": "Hook Generator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [] },
+								{ "key": "genre", "value": "POP", "type": "text" },
+								{ "key": "mood", "value": "Chill & Smooth", "type": "text" },
+								{ "key": "optional_ideas", "value": "Ocean waves, summer etc", "type": "text" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/hook-generator", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "hook-generator" ] }
+					}
+				},
+				{
+					"name": "Genre Matcher",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [], "description": "REQUIRED" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/genre-matcher", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "genre-matcher" ] }
+					}
+				},
+				{
+					"name": "Mood Analyzer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [], "description": "REQUIRED" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/mood-analyzer", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "mood-analyzer" ] }
+					}
+				},
+				{
+					"name": "AI Mixing Assistant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [], "description": "REQUIRED" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/mixing-assistant", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "mixing-assistant" ] }
+					}
+				},
+				{
+					"name": "Mastering Tool",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "audio", "type": "file", "src": [], "description": "REQUIRED" }
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/mastering-tool", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "mastering-tool" ] }
+					}
+				},
+				{
+					"name": "Lyric Generator (async-task wrapper around OpenAI)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mood\": \"Happy\",\n    \"theme\": \"Love\",\n    \"genre\": \"POP\",\n    \"optional_ideas\": \"Ocean waves, summer\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/lyric-generator", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "lyric-generator" ] }
+					}
+				},
+				{
+					"name": "Poll Task Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/tools/tasks/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "tools", "tasks", "1" ] }
+					}
+				},
+				{
+					"name": "List My AI Tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/tools/tasks?tool=&per_page=20&page=1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "tools", "tasks" ],
+							"query": [
+								{ "key": "tool", "value": "", "description": "vocal-enhancer | melody-generator | hook-generator | ..." },
+								{ "key": "per_page", "value": "20" },
+								{ "key": "page", "value": "1" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rights Management",
+			"description": "Backs the Figma Rights tab — list creator's tracks (projects), CRUD collaborators with role + split %, view/edit agreement, upload custom agreement template.",
+			"item": [
+				{
+					"name": "List Projects (creator's tracks)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects" ] }
+					}
+				},
+				{
+					"name": "Project Detail (collaborators + splits + templates)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects", "1" ] }
+					}
+				},
+				{
+					"name": "Add Collaborator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": null,\n    \"name\": \"Alice Smith\",\n    \"role\": \"artist\",\n    \"percentage\": 50\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects/1/collaborators", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects", "1", "collaborators" ] }
+					}
+				},
+				{
+					"name": "Update Collaborator",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"producer\",\n    \"percentage\": 60\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects/1/collaborators/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects", "1", "collaborators", "1" ] }
+					}
+				},
+				{
+					"name": "Remove Collaborator",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects/1/collaborators/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects", "1", "collaborators", "1" ] }
+					}
+				},
+				{
+					"name": "Update Agreement (Edit Agreement screen)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"agreement\": \"<rich text body of the edited agreement>\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/projects/1/agreement", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "projects", "1", "agreement" ] }
+					}
+				},
+				{
+					"name": "Upload Custom Agreement Template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Custom Producer Split\",\n    \"category\": \"Custom\",\n    \"type\": \"Legal Agreement\",\n    \"body\": \"<template body>\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/rights/agreement-templates", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "rights", "agreement-templates" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Collab Requests",
+			"description": "Backs the Figma Home → Collab Requests section. Send, accept, decline, withdraw.",
+			"item": [
+				{
+					"name": "Send Collab Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"to_user_id\": 5,\n    \"song_generation_id\": 1,\n    \"title\": \"Family Memories Remix\",\n    \"role\": \"vocals\",\n    \"message\": \"Loved this track, would love to add vocals.\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/api/creator/collab-requests", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "collab-requests" ] }
+					}
+				},
+				{
+					"name": "Incoming Requests (recipient view)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/collab-requests/incoming?status=pending",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "collab-requests", "incoming" ],
+							"query": [
+								{ "key": "status", "value": "pending", "description": "pending | accepted | declined" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Outgoing Requests (sender view)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/collab-requests/outgoing", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "collab-requests", "outgoing" ] }
+					}
+				},
+				{
+					"name": "Accept Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/collab-requests/1/accept", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "collab-requests", "1", "accept" ] }
+					}
+				},
+				{
+					"name": "Decline Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/collab-requests/1/decline", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "collab-requests", "1", "decline" ] }
+					}
+				},
+				{
+					"name": "Withdraw (sender cancels)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": { "raw": "{{baseUrl}}/api/creator/collab-requests/1/withdraw", "host": [ "{{baseUrl}}" ], "path": [ "api", "creator", "collab-requests", "1", "withdraw" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Creator",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/dashboard",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "dashboard" ]
+						}
+					}
+				},
+				{
+					"name": "Generate Song Using AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Cool AI Song\",\n    \"prompt\": \"A catchy pop song about summer\",\n    \"genre\": \"Pop\",\n    \"instrumentation\": \"Guitar, Drums\",\n    \"tempo\": 120,\n    \"gender\": \"m\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/generate/song/usingai",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "generate", "song", "usingai" ]
+						}
+					}
+				},
+				{
+					"name": "My Tracks (creator's own published)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/my/tracks",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "my", "tracks" ]
+						}
+					}
+				},
+				{
+					"name": "List AI Creations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/my/creation/with/ai",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "my", "creation", "with", "ai" ]
+						}
+					}
+				},
+				{
+					"name": "My Track Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/my/track/details/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "my", "track", "details", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Download Creator's Own Track",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/download/track/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "download", "track", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Song Generation Status (poll)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/creator/get/song/generation/status/{generationId}",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "creator", "get", "song", "generation", "status", "{generationId}" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Marketplace",
+			"item": [
+				{
+					"name": "List Tracks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/list/tracks",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "list", "tracks" ]
+						}
+					}
+				},
+				{
+					"name": "List Media",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/list/media",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "list", "media" ]
+						}
+					}
+				},
+				{
+					"name": "List All Media (Video/Illustration)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/list/media/all",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "list", "media", "all" ]
+						}
+					}
+				},
+				{
+					"name": "Featured Drops",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/featured?type=audio&limit=10",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "featured" ],
+							"query": [
+								{ "key": "type", "value": "audio", "description": "audio | video | illustration | media (= non-audio) | omit for all" },
+								{ "key": "limit", "value": "10" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Trending Now",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/trending?type=audio&limit=10",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "trending" ],
+							"query": [
+								{ "key": "type", "value": "audio" },
+								{ "key": "limit", "value": "10" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Recommended For You",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/recommended?type=media&limit=10",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "recommended" ],
+							"query": [
+								{ "key": "type", "value": "media" },
+								{ "key": "limit", "value": "10" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Recently Added (paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/recently-added?type=audio&limit=20&page=1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "recently-added" ],
+							"query": [
+								{ "key": "type", "value": "audio" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "page", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Track Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/track/details/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "track", "details", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Asset Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/asset/details/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "asset", "details", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Purchase Asset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"asset_id\": 1,\n    \"payment_method\": \"card\",\n    \"payment_token\": \"tok_visa\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/purchases/asset",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "purchases", "asset" ]
+						}
+					}
+				},
+				{
+					"name": "Purchase License",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"asset_id\": 1,\n    \"license_type\": \"personal\",\n    \"payment_method\": \"card\",\n    \"payment_token\": \"tok_visa\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/purchases/license",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "purchases", "license" ]
+						}
+					}
+				},
+				{
+					"name": "Invest in Asset (card)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"asset_id\": 1,\n    \"blocks\": 5,\n    \"payment_method\": \"card\",\n    \"payment_token\": \"tok_visa\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/purchases/investment",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "purchases", "investment" ]
+						}
+					}
+				},
+				{
+					"name": "Invest in Asset (wallet / MetaMask)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"asset_id\": 1,\n    \"blocks\": 5,\n    \"payment_method\": \"wallet\",\n    \"wallet_address\": \"0x742d35Cc6634C0532925a3b844Bc454e4438f44e\",\n    \"tx_hash\": \"0xa1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/marketplace/purchases/investment",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "marketplace", "purchases", "investment" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Consumer",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/dashboard",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "dashboard" ]
+						}
+					}
+				},
+				{
+					"name": "Track Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/view/track/details/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "view", "track", "details", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Search Track",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"summer\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/search/track",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "search", "track" ]
+						}
+					}
+				},
+				{
+					"name": "My Purchases",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/my/purchases",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "my", "purchases" ]
+						}
+					}
+				},
+				{
+					"name": "My Library (My Tracks tab — unified purchases + licenses + investments)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('library returns 200', () => pm.response.to.have.status(200));",
+									"const body = pm.response.json();",
+									"pm.test('payload has count + totals + data', () => {",
+									"    pm.expect(body).to.have.property('count');",
+									"    pm.expect(body.totals).to.have.all.keys('purchased', 'licensed', 'invested');",
+									"    pm.expect(body.data).to.be.an('array');",
+									"});",
+									"if (body.data && body.data.length) {",
+									"    const first = body.data[0];",
+									"    pm.test('items carry type, track, creator', () => {",
+									"        pm.expect(first.type).to.be.oneOf(['purchased', 'licensed', 'invested']);",
+									"        pm.expect(first).to.have.property('track');",
+									"        pm.expect(first).to.have.property('creator');",
+									"    });",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/my/library?type=&limit=50",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "my", "library" ],
+							"query": [
+								{ "key": "type", "value": "", "description": "optional: 'purchased' | 'licensed' | 'invested' | empty for all" },
+								{ "key": "limit", "value": "50", "description": "items per type (1-200, default 50)" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Download Licensed Asset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/download/licensed/asset/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "download", "licensed", "asset", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Download Purchased Asset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/download/purchased/asset/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "download", "purchased", "asset", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Purchase Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/my/purchase/details/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "my", "purchase", "details", "1" ]
+						}
+					}
+				},
+				{
+					"name": "Become Creator",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/consumer/become/creator",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "consumer", "become", "creator" ]
+						}
+					}
+				},
+				{
+					"name": "View Agreement (structured response)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/view/agreement/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "view", "agreement", "1" ]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Investments",
+			"item": [
+				{
+					"name": "Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/investments/summary",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "investments", "summary" ]
+						}
+					}
+				},
+				{
+					"name": "List All Investments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/investments/",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "investments", "" ]
+						}
+					}
+				},
+				{
+					"name": "Investment Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{token}}" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/investments/1",
+							"host": [ "{{baseUrl}}" ],
+							"path": [ "api", "investments", "1" ]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{ "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "" ] } },
+		{ "listen": "test", "script": { "type": "text/javascript", "exec": [ "" ] } }
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "https://ovatify.stylehubly.ai", "type": "string" },
+		{ "key": "token", "value": "", "type": "string" },
+		{ "key": "otp", "value": "", "type": "string" },
+		{ "key": "user_id", "value": "", "type": "string" },
+		{ "key": "email", "value": "", "type": "string" },
+		{ "key": "username", "value": "", "type": "string" },
+		{ "key": "phone", "value": "", "type": "string" },
+		{ "key": "password", "value": "secret123", "type": "string" }
+	]
+}

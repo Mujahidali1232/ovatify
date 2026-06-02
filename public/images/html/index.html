@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Track Details</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .wave-bar {
+            width: 4px;
+            background: rgba(139, 92, 246, 0.35);
+            border-radius: 4px;
+            transition: height 0.2s ease, background-color 0.2s ease;
+            pointer-events: none;
+        }
+
+        .wave-bar.active {
+            background: linear-gradient(to top, #8B5CF6, #22D3EE);
+        }
+    </style>
+
+
+    <!-- Tailwind Dark Theme Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#22D3EE',
+                        darkBg: '#0F0F14',
+                        cardBg: '#1A1A22',
+                        mutedText: '#9CA3AF'
+                    }
+                }
+            }
+        }
+    </script>
+
+
+
+</head>
+
+<body class="bg-darkBg text-white font-sans">
+
+    <!-- ================= Header ================= -->
+    <header class="flex items-center gap-3 px-6 py-4 border-b border-white/10">
+        <button class="text-primary text-lg">&larr;</button>
+        <h1 class="text-lg font-semibold">View Track Details</h1>
+    </header>
+
+    <!-- ================= Main Container ================= -->
+    <main class="max-w-4xl mx-auto px-6 py-8 space-y-8">
+
+        <!-- ========== Creator Section ========== -->
+        <section class="flex items-center gap-4">
+            <img src="https://i.pravatar.cc/100" alt="Creator Avatar"
+                class="w-14 h-14 rounded-full border border-white/10" />
+            <div>
+                <h2 class="text-lg font-semibold">John Smith</h2>
+                <p class="text-sm text-mutedText">POP Music Expert</p>
+            </div>
+        </section>
+
+        <!-- ================= Audio Player ================= -->
+        <section class="w-full max-w-4xl bg-cardBg rounded-2xl p-6 shadow-lg relative overflow-hidden">
+
+            <!-- Background Glow -->
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-transparent to-cyan-400/20 blur-2xl">
+            </div>
+
+            <div class="relative flex items-center gap-5">
+
+                <!-- Play / Pause -->
+                <button id="playPauseBtn" class="w-14 h-10 flex items-center justify-center rounded-full
+                       bg-gradient-to-r from-primary to-secondary
+                       shadow-lg hover:scale-105 transition">
+                    <!-- Play -->
+                    <svg id="playIcon" class="w-6 h-6 fill-white ml-1" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+
+                    <!-- Pause -->
+                    <svg id="pauseIcon" class="w-6 h-6 fill-white hidden" viewBox="0 0 24 24">
+                        <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
+                    </svg>
+                </button>
+
+                <!-- Waveform -->
+                <div id="waveform" class="flex-1 flex items-center gap-1 cursor-pointer pr-4" title="Click to seek">
+                </div>
+
+                <!-- Time -->
+                <span id="timeDisplay" class="text-sm text-mutedText whitespace-nowrap">
+                    0:00 / 0:00
+                </span>
+            </div>
+
+            <!-- Audio -->
+            <audio id="audioPlayer" src="audio.mp3"></audio>
+        </section>
+
+
+
+        <!-- ========== Description Section ========== -->
+        <section class="space-y-2">
+            <h3 class="text-lg font-semibold">Description</h3>
+            <p class="text-sm text-mutedText leading-relaxed">
+                This AI-generated track blends smooth Lo-fi beats with modern pop textures.
+                Designed for relaxation, productivity, and ambient listening.
+            </p>
+        </section>
+
+        <!-- ========== Metadata Section ========== -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-cardBg rounded-xl p-6">
+            <div class="text-center">
+                <h4 class="text-2xl font-semibold">100</h4>
+                <p class="text-sm text-mutedText">Total Blocks</p>
+            </div>
+            <div class="text-center">
+                <h4 class="text-2xl font-semibold">20</h4>
+                <p class="text-sm text-mutedText">Remaining Blocks</p>
+            </div>
+            <div class="text-center">
+                <h4 class="text-2xl font-semibold">$120</h4>
+                <p class="text-sm text-mutedText">Price per Block</p>
+            </div>
+        </section>
+
+        <!-- ========== Tags Section ========== -->
+        <section class="flex gap-3">
+            <span class="px-4 py-1 rounded-full text-sm bg-white/10">Genre - Lo-fi</span>
+            <span class="px-4 py-1 rounded-full text-sm bg-white/10">BPM - 75</span>
+        </section>
+
+        <!-- ========== Investment Section ========== -->
+        <section class="bg-cardBg rounded-xl p-6 space-y-5">
+            <h3 class="text-lg font-semibold">Select Blocks to Invest</h3>
+
+            <!-- Quantity Selector -->
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20">−</button>
+                <span class="text-xl font-semibold">01</span>
+                <button class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20">+</button>
+            </div>
+
+            <!-- CTA Button -->
+            <button class="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary font-semibold">
+                Invest Now
+            </button>
+        </section>
+
+    </main>
+
+    <!-- ================= Footer ================= -->
+    <footer class="text-center text-xs text-mutedText py-6 border-t border-white/10">
+        © 2025 AI Music Platform. All rights reserved.
+    </footer>
+
+    <!-- ================= Script ================= -->
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const waveform = document.getElementById('waveform');
+        const playBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const timeDisplay = document.getElementById('timeDisplay');
+
+        let bars = [];
+
+        /* ---------- Play / Pause ---------- */
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            } else {
+                audio.pause();
+                pauseIcon.classList.add('hidden');
+                playIcon.classList.remove('hidden');
+            }
+        });
+
+        /* ---------- Generate Full-Width Waveform ---------- */
+        function generateWaveform() {
+            waveform.innerHTML = '';
+            bars = [];
+
+            const waveformWidth = waveform.clientWidth;
+            const barWidth = 4;
+            const gap = 4;
+            const barCount = Math.floor(waveformWidth / (barWidth + gap));
+
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                bar.style.height = `${6 + Math.random() * 18}px`;
+                waveform.appendChild(bar);
+                bars.push(bar);
+            }
+        }
+
+        /* ---------- On Audio Load ---------- */
+        audio.addEventListener('loadedmetadata', () => {
+            generateWaveform();
+            timeDisplay.textContent = `0:00 / ${formatTime(audio.duration)}`;
+        });
+
+        /* ---------- On Resize ---------- */
+        window.addEventListener('resize', () => {
+            generateWaveform();
+        });
+
+        /* ---------- Progress Animation ---------- */
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+
+            const progress = audio.currentTime / audio.duration;
+            const activeBars = Math.floor(progress * bars.length);
+
+            bars.forEach((bar, index) => {
+                if (index <= activeBars) {
+                    bar.classList.add('active');
+                    bar.style.height = `${10 + Math.random() * 20}px`;
+                } else {
+                    bar.classList.remove('active');
+                    bar.style.height = `${6 + Math.random() * 10}px`;
+                }
+            });
+
+            timeDisplay.textContent =
+                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        });
+
+        /* ---------- Click to Seek ---------- */
+        waveform.addEventListener('click', (e) => {
+            if (!audio.duration) return;
+
+            const rect = waveform.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const ratio = clickX / rect.width;
+
+            audio.currentTime = ratio * audio.duration;
+        });
+
+        /* ---------- Reset ---------- */
+        audio.addEventListener('ended', () => {
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+        });
+
+        function formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+    </script>
+
+</body>
+
+</html>

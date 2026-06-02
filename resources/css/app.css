@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+
+@theme {
+    /* Core Colors - matching Figma */
+    --color-bg: #1A1A1A;
+    --color-sidebar: #252525;
+    --color-card: #252525;
+    --color-card-dark: #1A1A1A;
+    --color-accent: #FF00FF;
+    --color-accent-soft: #7C3AED;
+    --color-primary-blue: #4D61FF;
+    --color-text-muted: #9CA3AF;
+    --color-border-soft: #1F2937;
+    --color-border-light: #333333;
+    --color-success: #22C55E;
+    --color-warning: #EAB308;
+
+    /* Font */
+    --font-sans: "Inter", sans-serif;
+
+    /* Font Sizes */
+    --fs-10: 10px;
+    --fs-12: 12px;
+    --fs-14: 14px;
+    --fs-16: 16px;
+    --fs-18: 18px;
+    --fs-20: 20px;
+    --fs-24: 24px;
+    --fs-28: 28px;
+    --fs-32: 32px;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: #1A1A1A;
+}
+
+/* Audio Waveform Bars */
+.waveform-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(to top, #4155B1, #6B7FE3);
+}
+
+.waveform-bar-accent {
+    background: linear-gradient(to top, #FF00FF, #FF66FF);
+}
+
+/* Card Gradient Overlay for Track Cards */
+.track-card-bg {
+    background: linear-gradient(135deg, rgba(224, 38, 255, 0.4) 0%, rgba(168, 85, 247, 0.5) 50%, rgba(77, 97, 255, 0.3) 100%);
+}
+
+/* Glassmorphism for certain modals */
+.glass-effect {
+    background: rgba(37, 37, 37, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Play button glow */
+.play-btn-glow {
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+/* Custom scrollbar for specific containers */
+.custom-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #1A1A1A;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #4D61FF;
+    border-radius: 4px;
+}
+
+/* Category pill active state - default branding */
+.category-pill-active {
+    background-color: var(--color-primary-blue);
+    color: white;
+}
+
+.category-pill-magenta {
+    background-color: var(--color-accent);
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+.text-magenta {
+    color: var(--color-accent);
+}
+
+.border-magenta {
+    border-color: var(--color-accent);
+}
+
+.bg-magenta {
+    background-color: var(--color-accent);
+}
+
+.bg-magenta-hover:hover {
+    background-color: #E600E6;
+}
+
+.shadow-magenta {
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+}
+
+/* Investment card border gradient */
+.investment-card-border {
+    border: 1px solid rgba(138, 43, 226, 0.6);
+}
+
+/* Donut chart container */
+.donut-chart {
+    position: relative;
+}
+
+.donut-chart svg {
+    transform: rotate(-90deg);
+}
+
+/* Tab underline animation */
+.tab-underline {
+    position: relative;
+}
+
+.tab-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #7C3AED;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.tab-underline.active::after {
+    transform: scaleX(1);
+}
+
+/* Audio timeline track */
+.audio-timeline {
+    background: linear-gradient(90deg, #4D61FF 0%, #7C3AED 50%, #4D61FF 100%);
+}
+
+/* Modal overlay */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Progress bar animation */
+@keyframes progress-bar {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+.animate-progress {
+    animation: progress-bar 3s ease-out forwards;
+}
