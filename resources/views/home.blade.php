@@ -261,10 +261,26 @@
 				<div class="container-fluid">
 					<div class="isotope_container isotope row masonry-layout" data-filters=".isotope_filters">
 						@php
-							$images = ($featuredImages ?? collect());
+							$portfolioItems = collect([1, 2, 3, 4])->map(function ($i) use ($portfolioPlaceholder) {
+								$key = "home.portfolio.cms{$i}";
+								$url = \App\Models\SiteSetting::get("{$key}.url", '');
+								if ($url && !\Illuminate\Support\Str::startsWith($url, ['http://', 'https://', '/'])) {
+									$url = '/'.$url;
+								}
+
+								return [
+									'image' => \App\Models\SiteSetting::image("{$key}.image") ?: ($portfolioPlaceholder ?: ''),
+									'title' => \App\Models\SiteSetting::get("{$key}.title", ''),
+									'by' => \App\Models\SiteSetting::get("{$key}.by", ''),
+									'genre' => \App\Models\SiteSetting::get("{$key}.genre", ''),
+									'url' => $url ? url($url) : '#',
+								];
+							})->filter(function ($it) {
+								return !empty($it['image']) || !empty($it['title']) || !empty($it['by']) || !empty($it['genre']);
+							})->values();
 						@endphp
 
-						@if($images->isEmpty())
+						@if($portfolioItems->isEmpty())
 							<div class="isotope-item col-xs-6 col-md-4 col-lg-3 text-center fashion studio session">
 								<div class="vertical-item content-absolute vertical-center portfolio-filters">
 									<div class="item-media">
@@ -276,47 +292,38 @@
 										<div class="display_table">
 											<div class="display_table_cell text-left">
 												<div class="heading bottommargin_35">
-													<p class="text-uppercase josefin grey fontsize_20">Marketplace</p>
-													<h2 class="section_header topmargin_5 bottommargin_0">No images yet</h2>
+													<p class="text-uppercase josefin grey fontsize_20">{{ $portfolioKicker }}</p>
+													<h2 class="section_header topmargin_5 bottommargin_0">{{ $portfolioTitle }}</h2>
 												</div>
-												<p class="grey">Upload and list an illustration to see it here.</p>
+												<p class="grey">Add portfolio items in Admin → Site Content.</p>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						@else
-							@foreach($images as $img)
-								@php
-									$thumb = $img->thumbnail
-										? (\Illuminate\Support\Str::startsWith($img->thumbnail, ['http://','https://'])
-											? $img->thumbnail
-											: (\Illuminate\Support\Str::startsWith($img->thumbnail, ['theme/','images/'])
-												? url('/'.$img->thumbnail)
-												: url(\Illuminate\Support\Facades\Storage::url($img->thumbnail))))
-										: ($portfolioPlaceholder ?: '');
-								@endphp
+							@foreach($portfolioItems as $item)
 								<div class="isotope-item col-sm-6 col-md-4 col-lg-3 fashion">
 									<div class="vertical-item gallery-item content-absolute text-center">
 										<div class="item-media">
-											@if(!empty($thumb))
-												<img src="{{ $thumb }}" alt="{{ $img->title ?: 'Image' }}" style="width:100%; height:260px; object-fit:cover;">
+											@if(!empty($item['image']))
+												<img src="{{ $item['image'] }}" alt="{{ $item['title'] ?: 'Portfolio' }}" style="width:100%; height:260px; object-fit:cover;">
 											@endif
 											<div class="media-links">
 												<div class="links-wrap">
-													<a class="p-link" title="" href="{{ route('images.show', $img->id) }}"></a>
+													<a class="p-link" title="" href="{{ $item['url'] }}"></a>
 												</div>
 											</div>
 										</div>
 										<div class="item-content theme_background">
 											<h4 class="item-meta">
-												<a href="{{ route('images.show', $img->id) }}">{{ $img->title ?: 'Untitled' }}</a>
+												<a href="{{ $item['url'] }}">{{ $item['title'] ?: 'Untitled' }}</a>
 											</h4>
-										@if(!empty($img->user?->username))
-											<p class="small grey bottommargin_0">by {{ $img->user->username }}</p>
-										@endif
-											@if(!empty($img->songGeneration?->genre))
-												<p class="small grey bottommargin_0">{{ $img->songGeneration->genre }}</p>
+											@if(!empty($item['by']))
+												<p class="small grey bottommargin_0">by {{ $item['by'] }}</p>
+											@endif
+											@if(!empty($item['genre']))
+												<p class="small grey bottommargin_0">{{ $item['genre'] }}</p>
 											@endif
 										</div>
 									</div>

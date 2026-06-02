@@ -50,7 +50,31 @@ class SiteSettingsSeeder extends Seeder
             ['key' => 'home.portfolio.title',           'value' => 'Our beautiful works','type' => 'text', 'group_name' => 'Home', 'label' => 'Portfolio Title', 'sort_order' => 3],
             ['key' => 'home.portfolio.load_more_text',  'value' => 'Explore more',       'type' => 'text', 'group_name' => 'Home', 'label' => 'Portfolio Load More Text', 'sort_order' => 4],
             ['key' => 'home.portfolio.load_more_url',   'value' => '/images',            'type' => 'url',  'group_name' => 'Home', 'label' => 'Portfolio Load More URL', 'sort_order' => 5],
-            ['key' => 'home.portfolio.placeholder_image', 'value' => 'theme/images/models_square/01.jpg','type' => 'image','group_name' => 'Home', 'label' => 'Portfolio Placeholder Image (optional)', 'sort_order' => 6],
+            ['key' => 'home.portfolio.placeholder_image', 'value' => 'theme/images/models_square/01.jpg','type' => 'image','group_name' => 'Home', 'label' => 'Portfolio Load More Background Image', 'sort_order' => 6],
+
+            ['key' => 'home.portfolio.cms1.image', 'value' => 'theme/images/models_square/14.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #1 Image', 'sort_order' => 60],
+            ['key' => 'home.portfolio.cms1.title', 'value' => 'Sunset Portrait',                 'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #1 Title', 'sort_order' => 61],
+            ['key' => 'home.portfolio.cms1.by',    'value' => 'Luna Beats',                      'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #1 By', 'sort_order' => 62],
+            ['key' => 'home.portfolio.cms1.genre', 'value' => 'POP',                             'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #1 Genre', 'sort_order' => 63],
+            ['key' => 'home.portfolio.cms1.url',   'value' => '/images',                         'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #1 URL', 'sort_order' => 64],
+
+            ['key' => 'home.portfolio.cms2.image', 'value' => 'theme/images/models_square/21.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #2 Image', 'sort_order' => 70],
+            ['key' => 'home.portfolio.cms2.title', 'value' => 'Neon City',                         'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #2 Title', 'sort_order' => 71],
+            ['key' => 'home.portfolio.cms2.by',    'value' => 'Luna Beats',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #2 By', 'sort_order' => 72],
+            ['key' => 'home.portfolio.cms2.genre', 'value' => 'EDM',                               'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #2 Genre', 'sort_order' => 73],
+            ['key' => 'home.portfolio.cms2.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #2 URL', 'sort_order' => 74],
+
+            ['key' => 'home.portfolio.cms3.image', 'value' => 'theme/images/models_square/03.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #3 Image', 'sort_order' => 80],
+            ['key' => 'home.portfolio.cms3.title', 'value' => 'Abstract Waves',                    'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #3 Title', 'sort_order' => 81],
+            ['key' => 'home.portfolio.cms3.by',    'value' => 'Luna Beats',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #3 By', 'sort_order' => 82],
+            ['key' => 'home.portfolio.cms3.genre', 'value' => 'Lo-fi',                             'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #3 Genre', 'sort_order' => 83],
+            ['key' => 'home.portfolio.cms3.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #3 URL', 'sort_order' => 84],
+
+            ['key' => 'home.portfolio.cms4.image', 'value' => 'theme/images/models_square/22.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #4 Image', 'sort_order' => 90],
+            ['key' => 'home.portfolio.cms4.title', 'value' => 'Cover Art: Electric Pulse',         'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #4 Title', 'sort_order' => 91],
+            ['key' => 'home.portfolio.cms4.by',    'value' => 'Nova Sound',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #4 By', 'sort_order' => 92],
+            ['key' => 'home.portfolio.cms4.genre', 'value' => 'EDM',                               'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #4 Genre', 'sort_order' => 93],
+            ['key' => 'home.portfolio.cms4.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #4 URL', 'sort_order' => 94],
 
             ['key' => 'home.sections.songs_enabled',     'value' => '1',                  'type' => 'text', 'group_name' => 'Home', 'label' => 'Show Songs Covers Grid (1/0)', 'sort_order' => 6],
             ['key' => 'home.songs.kicker',               'value' => 'Music',              'type' => 'text', 'group_name' => 'Home', 'label' => 'Songs Kicker', 'sort_order' => 7],
