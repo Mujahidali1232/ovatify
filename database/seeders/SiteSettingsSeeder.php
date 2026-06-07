@@ -39,10 +39,20 @@ class SiteSettingsSeeder extends Seeder
             ['key' => 'hero.slide3.cta_text', 'value' => 'Join as Creator', 'type' => 'text', 'group_name' => 'Hero', 'label' => 'Slide 3 CTA Text', 'sort_order' => 23],
             ['key' => 'hero.slide3.cta_url', 'value' => '/register', 'type' => 'url', 'group_name' => 'Hero', 'label' => 'Slide 3 CTA URL', 'sort_order' => 24],
 
-            // About
-            ['key' => 'about.title', 'value' => 'About Ovatify',                                                                         'type' => 'text',     'group_name' => 'About', 'label' => 'About Section Title', 'sort_order' => 1],
-            ['key' => 'about.body',  'value' => 'Ovatify connects creators with their audience through licensing, investments, and distribution.', 'type' => 'textarea', 'group_name' => 'About', 'label' => 'About Section Body',  'sort_order' => 2],
-            ['key' => 'about.image', 'value' => 'theme/images/model1.png',                                                                'type' => 'image',    'group_name' => 'About', 'label' => 'About Image',         'sort_order' => 3],
+            // About (Search & Creator Layout)
+            ['key' => 'home.search.enabled', 'value' => '1', 'type' => 'text', 'group_name' => 'About', 'label' => 'Enable Search Section (1/0)', 'sort_order' => 1],
+            ['key' => 'home.search.title', 'value' => 'FEATURED OUR BEAUTIFUL WORKS', 'type' => 'text', 'group_name' => 'About', 'label' => 'Search Section Title', 'sort_order' => 2],
+            ['key' => 'home.search.categories', 'value' => 'ALL, MUSIC, IMAGES, MERCHANDISE', 'type' => 'text', 'group_name' => 'About', 'label' => 'Search Categories (comma separated)', 'sort_order' => 3],
+            ['key' => 'about.creator.enabled', 'value' => '1', 'type' => 'text', 'group_name' => 'About', 'label' => 'Enable About Creator Section (1/0)', 'sort_order' => 4],
+            ['key' => 'about.creator.section_title', 'value' => 'ABOUT CREATOR', 'type' => 'text', 'group_name' => 'About', 'label' => 'About Creator Section Title', 'sort_order' => 5],
+            ['key' => 'about.creator.content', 'value' => 'Ovatify connects creators with their audience through licensing, investments, and distribution. We empower artists to share their work securely and seamlessly.', 'type' => 'textarea', 'group_name' => 'About', 'label' => 'Main Text Content', 'sort_order' => 6],
+            ['key' => 'about.creator.image_left', 'value' => '', 'type' => 'image', 'group_name' => 'About', 'label' => 'Left Image (Mask/Art)', 'sort_order' => 7],
+            ['key' => 'about.creator.profile_image', 'value' => '', 'type' => 'image', 'group_name' => 'About', 'label' => 'Creator Profile Image', 'sort_order' => 8],
+            ['key' => 'about.creator.name', 'value' => 'Jenn Roberts', 'type' => 'text', 'group_name' => 'About', 'label' => 'Creator Name', 'sort_order' => 9],
+            ['key' => 'about.creator.subtitle', 'value' => 'Love is in the air', 'type' => 'text', 'group_name' => 'About', 'label' => 'Creator Subtitle/Tagline', 'sort_order' => 10],
+            ['key' => 'about.creator.description', 'value' => 'Here will be the product detail. For example - if you are a creator you can do everything in one place. Buy to download, License to use, Invest to share revenue.', 'type' => 'textarea', 'group_name' => 'About', 'label' => 'Creator Description', 'sort_order' => 11],
+            ['key' => 'about.creator.button_text', 'value' => 'Buy to download', 'type' => 'text', 'group_name' => 'About', 'label' => 'Creator Button Text', 'sort_order' => 12],
+            ['key' => 'about.creator.button_url', 'value' => '/register', 'type' => 'url', 'group_name' => 'About', 'label' => 'Creator Button URL', 'sort_order' => 13],
 
             // Home (Theme sections)
             ['key' => 'home.sections.portfolio_enabled', 'value' => '1', 'type' => 'text', 'group_name' => 'Home', 'label' => 'Show Portfolio / Marketplace Grid (1/0)', 'sort_order' => 1],
@@ -75,6 +85,18 @@ class SiteSettingsSeeder extends Seeder
             ['key' => 'home.portfolio.cms4.by',    'value' => 'Nova Sound',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #4 By', 'sort_order' => 92],
             ['key' => 'home.portfolio.cms4.genre', 'value' => 'EDM',                               'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #4 Genre', 'sort_order' => 93],
             ['key' => 'home.portfolio.cms4.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #4 URL', 'sort_order' => 94],
+
+            ['key' => 'home.portfolio.cms5.image', 'value' => 'theme/images/models_square/14.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #5 Image', 'sort_order' => 100],
+            ['key' => 'home.portfolio.cms5.title', 'value' => 'Dreamscape',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #5 Title', 'sort_order' => 101],
+            ['key' => 'home.portfolio.cms5.by',    'value' => 'Luna Beats',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #5 By', 'sort_order' => 102],
+            ['key' => 'home.portfolio.cms5.genre', 'value' => 'Ambient',                           'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #5 Genre', 'sort_order' => 103],
+            ['key' => 'home.portfolio.cms5.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #5 URL', 'sort_order' => 104],
+
+            ['key' => 'home.portfolio.cms6.image', 'value' => 'theme/images/models_square/21.jpg', 'type' => 'image', 'group_name' => 'Home', 'label' => 'Portfolio Item #6 Image', 'sort_order' => 110],
+            ['key' => 'home.portfolio.cms6.title', 'value' => 'Vibe Check',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #6 Title', 'sort_order' => 111],
+            ['key' => 'home.portfolio.cms6.by',    'value' => 'Nova Sound',                        'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #6 By', 'sort_order' => 112],
+            ['key' => 'home.portfolio.cms6.genre', 'value' => 'Hip Hop',                           'type' => 'text',  'group_name' => 'Home', 'label' => 'Portfolio Item #6 Genre', 'sort_order' => 113],
+            ['key' => 'home.portfolio.cms6.url',   'value' => '/images',                           'type' => 'url',   'group_name' => 'Home', 'label' => 'Portfolio Item #6 URL', 'sort_order' => 114],
 
             ['key' => 'home.sections.songs_enabled',     'value' => '1',                  'type' => 'text', 'group_name' => 'Home', 'label' => 'Show Songs Covers Grid (1/0)', 'sort_order' => 6],
             ['key' => 'home.songs.kicker',               'value' => 'Music',              'type' => 'text', 'group_name' => 'Home', 'label' => 'Songs Kicker', 'sort_order' => 7],

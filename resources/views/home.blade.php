@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
@@ -84,13 +84,22 @@
 								<nav class="mainmenu_wrapper">
 									<ul class="mainmenu nav sf-menu">
 										<li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">Home</a></li>
-										<li class="{{ request()->is('music*') ? 'active' : '' }}"><a href="{{ url('/music') }}">Music</a></li>
-										<li class="{{ request()->is('images*') ? 'active' : '' }}"><a href="{{ url('/images') }}">Images</a></li>
-										<li class="{{ request()->is('merchandise*') ? 'active' : '' }}"><a href="{{ url('/merchandise') }}">Merchandise</a></li>
-										<li class="{{ request()->is('business*') ? 'active' : '' }}"><a href="{{ url('/business') }}">Business</a></li>
+										<li class="{{ request()->is('music*') ? 'active' : '' }}"><a href="#music" onclick="scrollToSec('music'); return false;">Music</a></li>
+										<li class="{{ request()->is('images*') ? 'active' : '' }}"><a href="#images" onclick="scrollToSec('images'); return false;">Images</a></li>
+										<li class="{{ request()->is('merchandise*') ? 'active' : '' }}"><a href="#merchandise" onclick="scrollToSec('merchandise'); return false;">Merchandise</a></li>
+										<li class="{{ request()->is('business*') ? 'active' : '' }}"><a href="#business" onclick="scrollToSec('business'); return false;">Business</a></li>
 										<li class="{{ request()->is('register*') ? 'active' : '' }}"><a href="{{ route('register') }}">Join</a></li>
 										<li class="{{ request()->is('login*') ? 'active' : '' }}"><a href="{{ route('login') }}">Login</a></li>
 									</ul>
+									<script>
+										function scrollToSec(id) {
+											var el = document.getElementById(id);
+											if(el) {
+												var y = el.getBoundingClientRect().top + window.scrollY - 80;
+												window.scrollTo({top: y, behavior: 'smooth'});
+											}
+										}
+									</script>
 							</nav>
 							<!-- eof main nav -->
 							<span class="toggle_menu hidden-xs">
@@ -126,7 +135,7 @@
 
 							$heroSlides = [
 								[
-									'image' => \App\Models\SiteSetting::image('hero.slide1.image'),
+									'image' => \App\Models\SiteSetting::image('hero.slide1.image', asset('theme/images/slide01.jpg')),
 									'heading' => \App\Models\SiteSetting::get('hero.slide1.heading', 'Music. Ownership. Reinvented.'),
 									'subheading' => \App\Models\SiteSetting::get('hero.slide1.subheading', ''),
 									'cta_text' => \App\Models\SiteSetting::get('hero.slide1.cta_text', 'Get Started'),
@@ -207,43 +216,83 @@
 				<!-- eof flexslider -->
 			</section>
 
-			<section class="ls section_padding_top_110 columns_margin_0 image-overflow">
-				@php
-					$aboutTitle = \App\Models\SiteSetting::get('about.title', 'About Ovatify');
-					$aboutBody  = \App\Models\SiteSetting::get('about.body', '');
-					$aboutImage = \App\Models\SiteSetting::image('about.image');
-							$portfolioPlaceholder = \App\Models\SiteSetting::image('home.portfolio.placeholder_image');
-							$songsPlaceholder     = \App\Models\SiteSetting::image('home.songs.placeholder_image');
-							$creatorPlaceholder   = \App\Models\SiteSetting::image('home.creators.placeholder_avatar');
-				@endphp
+			@php
+				$portfolioPlaceholder = \App\Models\SiteSetting::image('home.portfolio.placeholder_image');
+				$songsPlaceholder     = \App\Models\SiteSetting::image('home.songs.placeholder_image');
+				$creatorPlaceholder   = \App\Models\SiteSetting::image('home.creators.placeholder_avatar');
+
+				$searchEnabled = \App\Models\SiteSetting::get('home.search.enabled', '1') === '1';
+				$searchTitle   = \App\Models\SiteSetting::get('home.search.title', 'FEATURED OUR BEAUTIFUL WORKS');
+				$searchCats    = array_filter(array_map('trim', explode(',', \App\Models\SiteSetting::get('home.search.categories', 'ALL, MUSIC, IMAGES, MERCHANDISE'))));
+				
+				$aboutEnabled      = \App\Models\SiteSetting::get('about.creator.enabled', '1') === '1';
+				$aboutSectionTitle = \App\Models\SiteSetting::get('about.creator.section_title', 'ABOUT CREATOR');
+				$aboutContent      = \App\Models\SiteSetting::get('about.creator.content', '');
+				$aboutImageLeft    = \App\Models\SiteSetting::image('about.creator.image_left');
+				$aboutImageProfile = \App\Models\SiteSetting::image('about.creator.profile_image');
+				$aboutName         = \App\Models\SiteSetting::get('about.creator.name', 'Jenn Roberts');
+				$aboutSubtitle     = \App\Models\SiteSetting::get('about.creator.subtitle', 'Love is in the air');
+				$aboutDesc         = \App\Models\SiteSetting::get('about.creator.description', '');
+				$aboutBtnText      = \App\Models\SiteSetting::get('about.creator.button_text', 'Buy to download');
+				$aboutBtnUrl       = \App\Models\SiteSetting::get('about.creator.button_url', '/register');
+			@endphp
+
+			@if($searchEnabled)
+			<section class="ls columns_margin_0" style="padding-top: 180px !important; margin-top: 50px;">
 				<div class="container">
 					<div class="row">
-						<div class="col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6">
-							<div class="heading bottommargin_40">
-								<p class="text-uppercase josefin grey fontsize_20">History</p>
-								<h2 class="section_header topmargin_5 bottommargin_0">{{ $aboutTitle }}</h2>
+						<div class="col-sm-12 col-md-10 col-lg-8" style="padding-bottom: 20px;">
+							<div class="heading bottommargin_20" style="text-align: left;">
+								@php
+									$parts = explode(' ', $searchTitle, 2);
+								@endphp
+								<div style="display: flex; align-items: center; margin-bottom: 5px;">
+									<p class="text-uppercase josefin grey fontsize_12" style="margin-bottom: 0; letter-spacing: 2px; padding-right: 20px;">{{ $parts[0] ?? 'FEATURED' }}</p>
+									<div style="flex-grow: 1; border-bottom: 1px solid #ddd; max-width: 300px;"></div>
+								</div>
+								<h2 class="section_header text-uppercase" style="margin-top: 0; margin-bottom: 0; font-size: 32px; font-weight: 800; letter-spacing: 1px; white-space: nowrap; color: #222;">{{ $parts[1] ?? 'OUR BEAUTIFUL WORKS' }}</h2>
 							</div>
-							@if(!empty($aboutBody))
-								<p>{{ $aboutBody }}</p>
-							@endif
-							<ul class="list2 leftmargin_50 topmargin_30">
-								<li>Vestibulum eget elit sed elit pulvinar tempor nec sed ipsum;</li>
-								<li>Duis sit amet laoreet orci, vitae convallis ante;</li>
-								<li>Aliquam non nulla volutpat, venenatis enim et, venenatis est.;</li>
-								<li>Mauris consequat, neque ac pharetra mattis, orci diam malesuada purus;</li>
-								<li>Aliquam pharetra in eros sit amet cursus. </li>
-							</ul>
-						</div>
-						<div class="col-md-offset-1 col-md-10 col-lg-offset-0 col-lg-6 text-center text-lg-right to_animate" data-animation="fadeInRight">
-							@if($aboutImage)
-								<img src="{{ $aboutImage }}" alt="" class="top-overlap-small right-offset">
-							@endif
+							
+							<div class="filters" style="margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; text-align: left; display: flex; align-items: center;">
+								@foreach($searchCats as $idx => $cat)
+									<a href="#" style="color: #222; font-size: 11px; font-weight: 800; text-decoration: none;">{{ $cat }}</a>
+									@if($idx < count($searchCats) - 1)
+										<span style="margin: 0 10px; color: #ccc; font-size: 4px;"><i class="fa fa-circle"></i></span>
+									@endif
+								@endforeach
+							</div>
+							
+							<div class="search-bar-wrapper" style="max-width: 650px; margin-bottom: 40px; text-align: left; padding: 2px; background: linear-gradient(to right, #222, #d32f2f); border-radius: 3px;">
+								<form method="GET" action="{{ url('/') }}" style="width: 100%; display: flex; align-items: stretch; height: 45px; margin: 0; background: #fff; border-radius: 2px; overflow: hidden;">
+									<!-- Dropdown box -->
+									<div style="display: flex; align-items: center; padding: 0 15px; background: #fff; width: 140px; border-right: 1px solid #eee;">
+										<i class="fa fa-picture-o" style="margin-right: 8px; color: #222; font-size: 14px;"></i>
+										<select style="border: none; background: transparent; outline: none; cursor: pointer; color: #222; font-weight: bold; font-size: 11px; width: 100%; -webkit-appearance: none; -moz-appearance: none; appearance: none; padding-right: 10px;">
+											@foreach($searchCats as $cat)
+												<option value="{{ strtolower($cat) }}">{{ $cat === 'ALL' ? 'All Images' : ucfirst(strtolower($cat)) }}</option>
+											@endforeach
+										</select>
+										<i class="fa fa-caret-down" style="color: #222; font-size: 10px; margin-left: auto;"></i>
+									</div>
+									
+									<!-- Input -->
+									<div style="flex: 1; display: flex; position: relative; background: #fff;">
+										<input type="text" name="search" placeholder="Search your next project" style="flex: 1; border: none; padding: 0 20px; outline: none; font-size: 12px; color: #999; width: 100%; background: transparent;">
+									</div>
+									
+									<!-- Search Button -->
+									<button type="submit" style="background: #e31e5f; color: white; border: none; padding: 0 25px; cursor: pointer; height: 100%;">
+										<i class="fa fa-search"></i>
+									</button>
+								</form>
+							</div>
 						</div>
 					</div>
 				</div>
 			</section>
+			@endif
 
-			<section class="ls ms columns_margin_0 columns_padding_0 page_portfolio">
+			<section id="images" class="ls page_portfolio" style="background: #fff; padding-bottom: 0;">
 				@php
 					$portfolioEnabled = \App\Models\SiteSetting::get('home.sections.portfolio_enabled', '1') === '1';
 					$portfolioKicker  = \App\Models\SiteSetting::get('home.portfolio.kicker', 'Portfolio');
@@ -258,10 +307,10 @@
 					$songsMoreUrl = \App\Models\SiteSetting::get('home.songs.more_url', '/music');
 				@endphp
 				@if($portfolioEnabled)
-				<div class="container-fluid">
-					<div class="isotope_container isotope row masonry-layout" data-filters=".isotope_filters">
+				<div class="container">
+					<div class="row" style="display: flex; flex-wrap: wrap;">
 						@php
-							$portfolioItems = collect([1, 2, 3, 4])->map(function ($i) use ($portfolioPlaceholder) {
+							$portfolioItems = collect([1, 2, 3, 4, 5, 6])->map(function ($i) use ($portfolioPlaceholder) {
 								$key = "home.portfolio.cms{$i}";
 								$url = \App\Models\SiteSetting::get("{$key}.url", '');
 								if ($url && !\Illuminate\Support\Str::startsWith($url, ['http://', 'https://', '/'])) {
@@ -303,57 +352,159 @@
 							</div>
 						@else
 							@foreach($portfolioItems as $item)
-								<div class="isotope-item col-sm-6 col-md-4 col-lg-3 fashion">
-									<div class="vertical-item gallery-item content-absolute text-center">
-										<div class="item-media">
+								<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 fashion" style="margin-bottom: 30px;">
+									<div class="vertical-item gallery-item content-absolute text-center" style="margin-bottom: 30px;">
+										<div class="item-media" style="position: relative; overflow: hidden;" onmouseover="this.querySelector('.available-assets-hover').style.display='block';" onmouseout="this.querySelector('.available-assets-hover').style.display='none';">
 											@if(!empty($item['image']))
-												<img src="{{ $item['image'] }}" alt="{{ $item['title'] ?: 'Portfolio' }}" style="width:100%; height:260px; object-fit:cover;">
+												<img src="{{ $item['image'] }}" alt="{{ $item['title'] ?: 'Portfolio' }}" style="width:100%; aspect-ratio: 1 / 1; object-fit: cover; display:block;">
 											@endif
 											<div class="media-links">
 												<div class="links-wrap">
 													<a class="p-link" title="" href="{{ $item['url'] }}"></a>
 												</div>
 											</div>
-										</div>
-										<div class="item-content theme_background">
-											<h4 class="item-meta">
-												<a href="{{ $item['url'] }}">{{ $item['title'] ?: 'Untitled' }}</a>
-											</h4>
-											@if(!empty($item['by']))
-												<p class="small grey bottommargin_0">by {{ $item['by'] }}</p>
-											@endif
-											@if(!empty($item['genre']))
-												<p class="small grey bottommargin_0">{{ $item['genre'] }}</p>
-											@endif
+											<div class="available-assets-hover" style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); padding: 15px 10px; display: none; z-index: 10; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
+												<div style="text-align: left; width: 100%;">
+													<div style="font-size: 11px; font-weight: 800; color: #666; margin-bottom: 10px; letter-spacing: 1px; padding-left: 10px;">AVAILABLE ASSETS</div>
+													<div style="display: flex; justify-content: space-around; font-size: 14px; width: 100%;">
+														<div style="text-align: center;">
+															<div style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px auto;">
+																<i class="fa fa-music" style="color: #333; font-size: 12px; cursor: pointer;"></i>
+															</div>
+															<div style="font-size: 8px; font-weight: bold; color: #333;">MUSIC</div>
+														</div>
+														<div style="text-align: center;">
+															<div style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px auto;">
+																<i class="fa fa-picture-o" style="color: #333; font-size: 12px; cursor: pointer;"></i>
+															</div>
+															<div style="font-size: 8px; font-weight: bold; color: #333;">IMAGES</div>
+														</div>
+														<div style="text-align: center;">
+															<div style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px auto;">
+																<i class="fa fa-shopping-bag" style="color: #333; font-size: 12px; cursor: pointer;"></i>
+															</div>
+															<div style="font-size: 8px; font-weight: bold; color: #333;">MERCHANDISE</div>
+														</div>
+														<div style="text-align: center;">
+															<div style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px auto;">
+																<i class="fa fa-line-chart" style="color: #333; font-size: 12px; cursor: pointer;"></i>
+															</div>
+															<div style="font-size: 8px; font-weight: bold; color: #333;">INVEST</div>
+														</div>
+													</div>
+												</div>
+											</div>
 										</div>
 									</div>
 								</div>
 							@endforeach
 						@endif
-						<div class="isotope-item col-sm-6 col-md-4 col-lg-3 fashion studio session">
-							<div class="vertical-item portfolio-load-more content-absolute vertical-center text-center">
-								<div class="item-media">
-									@if($portfolioPlaceholder)
-										<img src="{{ $portfolioPlaceholder }}" alt="">
-									@endif
-								</div>
-								<div class="item-content">
-									<div class="display_table">
-										<div class="display_table_cell darklinks">
-											<a href="{{ $portfolioMoreUrl }}" class="theme_link fontsize_20">{{ $portfolioMoreTxt }}</a>
-										</div>
-									</div>
-								</div>
-							</div>
+						{{-- <div class="isotope-item col-sm-6 col-md-4 col-lg-3 fashion studio session">
+							...
+						</div> --}}
+					</div>
+					
+					<!-- ASSETS DETAIL PAGE text divider -->
+					</div> <!-- close isotope row -->
+				</div> <!-- close container -->
+				<div style="width: 100%; background: #f5f5f5; padding: 20px 0; margin-top: 40px;">
+					<div class="container">
+						<div style="font-size: 13px; font-weight: 800; color: #555; letter-spacing: 1px; text-transform: uppercase; text-align: left;">
+							ASSETS DETAIL PAGE
 						</div>
 					</div>
 				</div>
 				@endif
 			</section>
 
+			@if($aboutEnabled)
+			<section class="ls section_padding_top_80 section_padding_bottom_100 columns_padding_25" style="background-color: #fff;">
+				<div class="container">
+					<div class="row" style="display: flex; flex-wrap: wrap;">
+						<!-- Left Column -->
+						<div class="col-md-7" style="display: flex; flex-direction: column; padding-right: 40px;">
+							<div class="heading bottommargin_30 text-left">
+								<h2 class="section_header text-uppercase" style="font-weight: 800; letter-spacing: 1px;">{{ $aboutSectionTitle }}</h2>
+							</div>
+							
+							<div class="about-content" style="font-size: 13px; line-height: 1.8; color: #666; margin-bottom: 40px;">
+								<p>{!! nl2br(e($aboutContent)) !!}</p>
+							</div>
+							
+							<!-- Icons Row -->
+							<div class="assets-icons" style="display: flex; gap: 20px; margin-bottom: 40px; justify-content: flex-start; flex-wrap: wrap;">
+								<div style="display: flex; align-items: center; gap: 10px;">
+									<div style="width: 2px; height: 35px; background: #6da2b8; margin-right: 5px;"></div>
+									<div class="asset-icon" style="text-align: center;">
+										<div style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #9c27b0; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+											<i class="fa fa-music" style="color: #9c27b0; font-size: 20px;"></i>
+										</div>
+										<span style="font-size: 10px; font-weight: bold; color: #333;">Music</span>
+									</div>
+								</div>
+								<div class="asset-icon" style="text-align: center; margin-left: 10px;">
+									<div style="width: 50px; height: 50px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+										<i class="fa fa-picture-o" style="color: #333; font-size: 20px;"></i>
+									</div>
+									<span style="font-size: 10px; font-weight: bold; color: #333;">Images</span>
+								</div>
+								<div class="asset-icon" style="text-align: center; margin-left: 10px;">
+									<div style="width: 50px; height: 50px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+										<i class="fa fa-shopping-bag" style="color: #333; font-size: 20px;"></i>
+									</div>
+									<span style="font-size: 10px; font-weight: bold; color: #333;">Merchandise</span>
+								</div>
+								<div class="asset-icon" style="text-align: center; margin-left: 10px;">
+									<div style="width: 50px; height: 50px; border-radius: 50%; border: 1px solid #333; display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+										<i class="fa fa-line-chart" style="color: #333; font-size: 20px;"></i>
+									</div>
+									<span style="font-size: 10px; font-weight: bold; color: #333;">Invest</span>
+								</div>
+							</div>
+
+							@if($aboutImageLeft)
+							<div class="about-image-left mt-auto" style="position: relative; display: inline-block; max-width: 320px;">
+								<img src="{{ $aboutImageLeft }}" alt="Creator Art" style="width: 100%; height: auto; object-fit: cover; display: block;">
+								<div style="position: absolute; bottom: -15px; right: 15px; width: 45px; height: 45px; border-radius: 50%; border: 2px solid #9c27b0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.9); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+									<i class="fa fa-play" style="color: #9c27b0; margin-left: 3px; font-size: 16px;"></i>
+								</div>
+							</div>
+							@endif
+						</div>
+
+						<!-- Right Column -->
+						<div class="col-md-5" style="margin-top: 30px; margin-md-top: 0;">
+							<div class="creator-profile-card" style="background: #fff; border: 1px solid #eee; display: flex; flex-direction: column; box-shadow: 0 5px 20px rgba(0,0,0,0.03);">
+								@if($aboutImageProfile)
+								<div class="creator-image">
+									<img src="{{ $aboutImageProfile }}" alt="{{ $aboutName }}" style="width: 100%; height: 450px; object-fit: cover; display: block;">
+								</div>
+								@endif
+								
+								<div style="padding: 30px; background: #fafafa;">
+									<h3 style="margin-top: 0; margin-bottom: 5px; font-weight: 800; font-size: 22px; color: #222;">{{ $aboutName }}</h3>
+									<p style="color: #888; font-size: 13px; font-weight: 700; margin-bottom: 25px;">{{ $aboutSubtitle }}</p>
+									
+									<div class="creator-desc" style="font-size: 12px; line-height: 1.6; color: #555; margin-bottom: 30px; font-weight: 700;">
+										<p>{!! nl2br(e($aboutDesc)) !!}</p>
+									</div>
+								</div>
+								
+								@if($aboutBtnText && $aboutBtnUrl)
+								<a href="{{ $aboutBtnUrl }}" class="theme_button" style="display: block; text-align: center; width: 100%; padding: 18px; margin: 0; background: #333; color: #fff; border: none; font-weight: 800; font-size: 14px; text-transform: none; border-radius: 0;">
+									{{ $aboutBtnText }}
+								</a>
+								@endif
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			@endif
+
 			{{-- Songs covers grid --}}
 			@if($songsEnabled)
-			<section class="ls ms columns_margin_0 columns_padding_0 page_portfolio">
+			<section id="music" class="ls ms columns_margin_0 columns_padding_0 page_portfolio">
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-xs-12 text-center">
@@ -426,7 +577,7 @@
 			</section>
 			@endif
 
-			<section class="ls section_padding_top_110 columns_margin_0">
+			<section id="business" class="ls section_padding_top_110 columns_margin_0">
 				@php
 					$castingEnabled = \App\Models\SiteSetting::get('home.sections.casting_enabled', '1') === '1';
 					$castingKicker  = \App\Models\SiteSetting::get('home.casting.kicker', 'Casting');
@@ -455,17 +606,21 @@
 									<i class="fa fa-plus" aria-hidden="true"></i>
 								</a>
 							</p>
+							
+							<div class="topmargin_30">
+								<a href="/register" class="theme_button" style="background-color: #fce823; color: #000; border: none; padding: 18px 30px; text-transform: none; font-weight: 700; font-size: 18px; width: 100%; max-width: 380px; text-align: center; border-radius: 4px; display: inline-block;">Get Started</a>
+							</div>
 
 						</div>
-						<div class="col-md-10 col-md-offset-1 col-lg-offset-0 col-lg-6 col-lg-pull-6 text-center">
-							<img src="{{ $castingImg ?: asset('theme/images/model2.jpg') }}" alt="" class="top-overlap-very-small">
+						<div class="col-md-10 col-md-offset-1 col-lg-offset-0 col-lg-6 col-lg-pull-6 text-center" style="display: flex; align-items: center; justify-content: center;">
+							<img src="{{ $castingImg ?: asset('theme/images/model2.jpg') }}" alt="" style="width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 4px;">
 						</div>
 					</div>
 				</div>
 				@endif
 			</section>
 
-			<section class="cs parallax page_testimonials section_padding_100">
+			{{-- <section class="cs parallax page_testimonials section_padding_100">
 				<div class="flexslider">
 					<ul class="slides">
 						<li>
@@ -603,7 +758,7 @@
 					</ul>
 				</div>
 				<!-- eof flexslider -->
-			</section>
+			</section> --}}
 
 			@php
 				$creatorsEnabled = \App\Models\SiteSetting::get('home.sections.creators_enabled', '1') === '1';
@@ -611,7 +766,7 @@
 				$creatorsTitle   = \App\Models\SiteSetting::get('home.creators.title', 'Featured creators');
 			@endphp
 			@if($creatorsEnabled)
-			<section class="ls section_padding_110">
+			<section id="merchandise" class="ls section_padding_110">
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-sm-12 text-center">

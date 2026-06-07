@@ -39,7 +39,7 @@ class SiteSetting extends Model
         }
         // Allow referencing public assets directly (e.g. "theme/images/slide01.jpg").
         if (str_starts_with($val, 'theme/') || str_starts_with($val, 'images/')) {
-            return url('/'.$val);
+            return asset($val);
         }
         // Anything we stored via the admin uploader lives under storage/app/public
         return url(\Illuminate\Support\Facades\Storage::url($val));
