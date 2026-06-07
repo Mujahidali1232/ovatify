@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="public/images/logo_dark.png" alt="Ovatify Logo" width="200"/>
-</p>
 
 <h1 align="center">🎵 Ovatify — Your Ultimate Music Platform</h1>
 
