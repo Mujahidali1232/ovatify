@@ -1,59 +1,271 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/images/logo_dark.png" alt="Ovatify Logo" width="200"/>
 </p>
 
-## About Laravel
+<h1 align="center">🎵 Ovatify — Your Ultimate Music Platform</h1>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+  A premium music creation and management platform built with Laravel 12
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
+</p>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📖 About Ovatify
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Ovatify** is a modern music creation and management platform that empowers creators to manage their tracks, explore new content, and handle investments and marketplace activities — all wrapped in a **premium, sleek dark-themed interface**.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Whether you're a music creator looking to publish your beats, a consumer searching for the perfect sound, or an investor wanting to fund the next big hit, Ovatify brings it all together in one powerful platform.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ✨ Features
 
-### Premium Partners
+### 🎛️ Creator Dashboard
+- Track your **earnings, publishes, and drafts** at a glance
+- Manage your music portfolio with real-time stats
+- Collaborate with other creators via **Collab Requests**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 🤖 AI Integration
+- Create new tracks using **AI-powered song generation**
+- Manage AI tasks and generation sessions
+- Smart creative session management with idea tracking
 
-## Contributing
+### 🛒 Marketplace
+- Explore, buy, and sell music content — **Beats, Vocals, Loops, and more**
+- Full **licensing system** with multiple license tiers
+- Secure **Stripe-powered payments** for all transactions
+- Investment opportunities in marketplace assets
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 🔐 User Authentication
+- Secure **sign-up and login** with email verification
+- Social login via **Laravel Socialite**
+- Email verification flow with verification codes
+- Password reset functionality
 
-## Code of Conduct
+### 📦 Distribution
+- Submit **distribution requests** to DSP platforms (Spotify, Apple Music, etc.)
+- Track distribution status and manage DSP integrations
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 💳 Seller & Financials
+- Bank account management for sellers
+- **Investment distribution** tracking and royalty management
+- Detailed transaction history
 
-## Security Vulnerabilities
+### 🎨 Premium UI
+- Modern **dark mode design** with vibrant accents
+- Responsive layout for all screen sizes
+- Built with **Tailwind CSS v4** and Blade Templates
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 📸 Screenshots
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+> _Add your screenshots to the `public/images/` directory and update the paths below._
+
+| Home Dashboard | My Tracks |
+|:--------------:|:---------:|
+| ![Home](public/images/login.png) | ![Tracks](public/images/login.png) |
+
+| Marketplace | Sign Up |
+|:-----------:|:-------:|
+| ![Marketplace](public/images/login.png) | ![Sign Up](public/images/login.png) |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- **PHP** >= 8.2
+- **Composer**
+- **Node.js** >= 18.x & **npm**
+- **MySQL** (or compatible database)
+
+---
+
+### ⚡ Quick Setup (One Command)
+
+```bash
+composer run setup
+```
+
+This will automatically run:
+- `composer install`
+- Copy `.env.example` → `.env` and generate app key
+- Run migrations
+- `npm install` & `npm run build`
+
+---
+
+### 🔧 Manual Installation
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/YOUR_USERNAME/ovatify.git
+cd ovatify
+```
+
+**2. Install PHP dependencies**
+```bash
+composer install
+```
+
+**3. Install Node dependencies**
+```bash
+npm install
+```
+
+**4. Environment Setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+**5. Configure your `.env` file**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ovatify
+DB_USERNAME=root
+DB_PASSWORD=your_password
+
+# Stripe (for payments)
+STRIPE_KEY=your_stripe_publishable_key
+STRIPE_SECRET=your_stripe_secret_key
+
+# Mail (for email verification)
+MAIL_MAILER=smtp
+MAIL_HOST=your_mail_host
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password
+```
+
+**6. Run Database Migrations**
+```bash
+php artisan migrate
+```
+
+**7. Build Frontend Assets**
+```bash
+npm run build
+```
+
+**8. Start the Development Server**
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000` in your browser 🎉
+
+---
+
+### 🛠 Full Dev Mode (with queue, logs, and Vite HMR)
+
+```bash
+composer run dev
+```
+
+This runs all services concurrently:
+- Laravel server (`php artisan serve`)
+- Queue worker (`php artisan queue:listen`)
+- Log viewer (`php artisan pail`)
+- Vite HMR (`npm run dev`)
+
+---
+
+## 🏗 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Laravel 12.x |
+| **Frontend** | Blade Templates, Tailwind CSS v4 |
+| **Database** | MySQL |
+| **Auth** | Laravel Sanctum + Socialite |
+| **Payments** | Stripe (stripe-php v19) |
+| **Build Tool** | Vite 7 + laravel-vite-plugin |
+| **Package Manager** | Composer + npm |
+| **Testing** | PHPUnit 11 |
+
+---
+
+## 📁 Project Structure
+
+```
+ovatify/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Api/          # REST API controllers
+│   │   │   ├── Consumer/     # Consumer-facing controllers
+│   │   │   ├── Creator/      # Creator dashboard controllers
+│   │   │   ├── Marketplace/  # Marketplace controllers
+│   │   │   ├── Stripe/       # Payment controllers
+│   │   │   └── Web/          # Web/view controllers
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Models/               # Eloquent models
+│   └── Services/             # Business logic services
+├── database/
+│   ├── migrations/           # Database schema
+│   ├── seeders/              # Database seeders
+│   └── factories/            # Model factories
+├── resources/
+│   └── views/                # Blade templates
+├── routes/                   # Route definitions
+└── public/                   # Public assets
+```
+
+---
+
+## 🧪 Running Tests
+
+```bash
+composer run test
+# or
+php artisan test
+```
+
+---
+
+## 📄 License
+
+The Ovatify platform is open-sourced software licensed under the **[MIT License](https://opensource.org/licenses/MIT)**.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 👥 Contributors
+
+<a href="https://github.com/sanalashari03">
+  <img src="https://github.com/sanalashari03.png" width="50" height="50" style="border-radius:50%" alt="sanalashari03"/>
+</a>
+
+---
+
+<p align="center">
+  Made with ❤️ by the Ovatify Team
+</p>
