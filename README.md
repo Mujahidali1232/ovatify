@@ -69,15 +69,17 @@ Whether you're a music creator looking to publish your beats, a consumer searchi
 
 ## 📸 Screenshots
 
-> _Add your screenshots to the `public/images/` directory and update the paths below._
-
-| Home Dashboard | My Tracks |
+| Home Dashboard | Home Page |
 |:--------------:|:---------:|
-| ![Home](public/images/login.png) | ![Tracks](public/images/login.png) |
+| ![Home Dashboard](public/Screenshot/Home%20Dashboard.JPG) | ![Home Page](public/Screenshot/Home%20page.JPG) |
 
-| Marketplace | Sign Up |
-|:-----------:|:-------:|
-| ![Marketplace](public/images/login.png) | ![Sign Up](public/images/login.png) |
+| Marketplace | My Tracks |
+|:-----------:|:---------:|
+| ![Marketplace](public/Screenshot/Marketplace.JPG) | ![My Tracks](public/Screenshot/My%20Tracks.JPG) |
+
+| Sign Up |
+|:-------:|
+| ![Sign Up](public/Screenshot/Sign%20Up.JPG) |
 
 ---
 
@@ -258,14 +260,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 👥 Contributors
 
-<a href="https://github.com/sanalashari03">
-  <img src="https://github.com/sanalashari03.png" width="50" height="50" style="border-radius:50%" alt="sanalashari03"/>
-</a>
 
----
 
-<p align="center">
-  Made with ❤️ by the Ovatify Team
-</p>
